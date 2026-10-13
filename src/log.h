@@ -1,6 +1,9 @@
 #include <string>
 #include <syncstream>
 #include <iostream>
+#include <chrono>
+#include <format>
+#include <thread>
 
 enum Level
 {
@@ -17,11 +20,12 @@ class LogMessage
 public:
     LogMessage(Level level, const std::string &prefix)
     {
-        buffer << '[' << toString(level) << "] ";
+        buffer << timestamp() << "; " << toString(level) << "; ";
         if (!prefix.empty())
         {
-            buffer << prefix << ": ";
+            buffer << prefix;
         }
+        buffer << "(" << std::this_thread::get_id() << "): ";
     }
     template <typename T>
     explicit LogMessage(Level level, const std::string &prefix, const T &first) : LogMessage(level, prefix)
@@ -46,6 +50,7 @@ public:
     }
 
 private:
+    std::string timestamp();
     std::osyncstream buffer{std::cout};
 };
 
@@ -71,5 +76,3 @@ private:
 
 Logger getLogger(const std::string &func);
 Logger getLogger();
-
-const char *toString(Level level);
